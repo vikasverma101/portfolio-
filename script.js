@@ -5,6 +5,7 @@
     const backToTop = document.getElementById('backToTop');
     const yearSpan = document.getElementById('year');
     const contactForm = document.getElementById('contact-form');
+    const navbar = document.querySelector('.navbar');
 
     // Set year
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
@@ -43,6 +44,15 @@
     }
     window.addEventListener('scroll', setActiveLink);
     window.addEventListener('load', setActiveLink);
+
+    // Navbar scrolled state
+    function updateNavbarScrolled() {
+        if (!navbar) return;
+        const scrolled = window.scrollY > 8;
+        navbar.classList.toggle('is-scrolled', scrolled);
+    }
+    window.addEventListener('scroll', updateNavbarScrolled);
+    window.addEventListener('load', updateNavbarScrolled);
 
     // Back to top visibility
     function handleBackToTop() {
