@@ -101,7 +101,7 @@
 
             const feedback = contactForm.querySelector('.form-feedback');
             if (valid) {
-                feedback.textContent = 'Thanks!';
+                feedback.textContent = 'Thanks! Your message was validated locally. Implement sending on your backend or email API.';
                 feedback.style.color = 'var(--success)';
                 contactForm.reset();
             } else {
@@ -110,5 +110,4 @@
             }
         });
     }
-
 })();
