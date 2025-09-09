@@ -23,23 +23,14 @@ async function loadAllSongs() {
         const albumFolders = ['ncs', 'cs', 'Angry_(mood)'];
         let allSongs = [];
 
-        // Get songs from each album folder
+        // Get songs from each album via JSON manifest (works on GitHub Pages)
         for (const folder of albumFolders) {
             try {
-                let a = await fetch(`songs/${folder}/`);
-                let response = await a.text();
-                let div = document.createElement("div");
-                div.innerHTML = response;
-                let as = div.getElementsByTagName("a");
-
-                for (let index = 0; index < as.length; index++) {
-                    const element = as[index];
-                    if (element.href.endsWith(".mp3")) {
-                        allSongs.push({
-                            name: element.href.split(`/${folder}/`)[1],
-                            folder: folder
-                        });
-                    }
+                const res = await fetch(`songs/${folder}/tracks.json`);
+                if (!res.ok) throw new Error(`tracks.json not found for ${folder}`);
+                const trackList = await res.json();
+                for (const trackName of trackList) {
+                    allSongs.push({ name: trackName, folder });
                 }
             } catch (error) {
                 console.error(`Error loading songs from ${folder}:`, error);
@@ -83,18 +74,9 @@ async function loadAllSongs() {
 async function getSongs(folder) {
     currFolder = folder;
     try {
-        let a = await fetch(`${folder}/`);
-        let response = await a.text();
-        let div = document.createElement("div");
-        div.innerHTML = response;
-        let as = div.getElementsByTagName("a");
-        songs = [];
-        for (let index = 0; index < as.length; index++) {
-            const element = as[index];
-            if (element.href.endsWith(".mp3")) {
-                songs.push(element.href.split(`/${folder}/`)[1]);
-            }
-        }
+        const res = await fetch(`${folder}/tracks.json`);
+        if (!res.ok) throw new Error(`tracks.json missing in ${folder}`);
+        songs = await res.json();
 
         return songs;
     } catch (error) {
@@ -108,7 +90,9 @@ const playMusic = (track, pause = false) => {
     try {
         // Get the clean track name without URL encoding
         const cleanTrack = decodeURIComponent(track);
-        currentSong.src = `${currFolder}/${cleanTrack}`;
+        // Encode filename segment so GitHub Pages serves it correctly (spaces, special chars)
+        const encodedFileName = encodeURIComponent(cleanTrack);
+        currentSong.src = `${currFolder}/${encodedFileName}`;
 
         // Update currentSongIndex
         currentSongIndex = songs.findIndex(song => decodeURIComponent(song) === cleanTrack);
